@@ -5,88 +5,107 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>dlist.ca</title>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
 
     body {
       background: #ffffff;
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      min-height: 100vh;
+      height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 60px 40px 48px;
+      padding: 28px 24px 24px;
+      overflow: hidden;
     }
 
     #logo-wrap {
-      margin-bottom: 52px;
+      margin-bottom: 28px;
       opacity: 0.9;
+      flex-shrink: 0;
     }
 
     #logo-wrap svg {
-      width: 200px;
+      width: clamp(120px, 22vw, 200px);
       height: auto;
+      display: block;
     }
 
     .headline {
-      font-size: clamp(16px, 2.5vw, 24px);
+      font-size: clamp(13px, 2.2vw, 22px);
       font-weight: 300;
       letter-spacing: -0.03em;
       color: #000;
       text-align: center;
       line-height: 1.35;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
+      flex-shrink: 0;
     }
 
     .sub {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 400;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: #999;
+      color: #aaa;
       text-align: center;
-      margin-bottom: 40px;
+      margin-bottom: 20px;
+      flex-shrink: 0;
     }
 
     #topo-wrap {
       width: 100%;
       max-width: 560px;
+      flex-shrink: 1;
+      min-height: 0;
     }
 
     #topo-wrap canvas {
       display: block;
       width: 100%;
       height: auto;
+      max-height: 38vh;
       cursor: crosshair;
     }
 
-    .hint {
+    .canvas-hint {
       font-size: 10px;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: #bbb;
+      color: #ccc;
       text-align: center;
-      margin-top: 14px;
-      margin-bottom: 14px;
+      margin-top: 12px;
+      margin-bottom: 12px;
+      flex-shrink: 0;
     }
 
     .mode-row {
       display: flex;
+      gap: 20px;
       width: 100%;
       max-width: 560px;
+      justify-content: center;
+      flex-shrink: 0;
     }
 
     .mode-btn {
-      flex: 1;
       background: none;
       border: none;
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
       font-size: 10px;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
       color: #bbb;
-      padding: 9px 0;
       cursor: pointer;
+      padding: 7px 20px;
       transition: color 0.15s, background 0.15s;
     }
 
@@ -96,21 +115,22 @@
     }
 
     .mode-btn:not(.active):hover {
-      color: #555;
+      color: #444;
     }
 
     #clear-btn {
-      margin-top: 12px;
+      margin-top: 10px;
       background: none;
       border: none;
-      font-family: inherit;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
       font-size: 10px;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: #ddd;
+      color: #ccc;
       cursor: pointer;
       padding: 4px 0;
       transition: color 0.15s;
+      flex-shrink: 0;
     }
 
     #clear-btn:hover {
@@ -158,7 +178,7 @@
     <canvas id="topo" width="560" height="320"></canvas>
   </div>
 
-  <p class="hint">Click to place a peak &nbsp;&mdash;&nbsp; watch the terrain form</p>
+  <p class="canvas-hint">Click to place a peak &nbsp;&mdash;&nbsp; watch the terrain form</p>
 
   <div class="mode-row">
     <button class="mode-btn active" id="btn-build" onclick="setMode('build',this)">Build</button>
@@ -190,13 +210,13 @@
     function draw() {
       ctx.clearRect(0, 0, W, H);
       if (!peaks.length) return;
-      const levels = 14, step = 1 / (levels + 1);
+      const levels = 14;
       for (let li = 1; li <= levels; li++) {
         const t = li / levels;
         ctx.strokeStyle = `rgba(0,0,0,${0.1 + t * 0.25})`;
         ctx.lineWidth = 0.4 + t * 0.5;
         ctx.beginPath();
-        march(li * step);
+        march(li / (levels + 1));
         ctx.stroke();
       }
     }
@@ -216,9 +236,9 @@
           const idx = ((tl>=thresh)?8:0)|((tr>=thresh)?4:0)|((br>=thresh)?2:0)|((bl>=thresh)?1:0);
           if (!idx || idx === 15) continue;
           const top    = [x0 + res*(thresh-tl)/(tr-tl||eps), y0];
-          const right  = [x1, y0 + res*(thresh-tr)/(br-tr||eps)];
+          const right  = [x1,  y0 + res*(thresh-tr)/(br-tr||eps)];
           const bottom = [x0 + res*(thresh-bl)/(br-bl||eps), y1];
-          const left   = [x0, y0 + res*(thresh-tl)/(bl-tl||eps)];
+          const left   = [x0,  y0 + res*(thresh-tl)/(bl-tl||eps)];
           const segs = {
             1:[bottom,left], 2:[right,bottom], 3:[right,left], 4:[top,right],
             5:[[top,right],[bottom,left]], 6:[top,bottom], 7:[top,left], 8:[top,left],
